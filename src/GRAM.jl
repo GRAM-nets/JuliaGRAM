@@ -1,67 +1,10 @@
 module GRAM
 
 using Statistics, LinearAlgebra, StatsFuns, Distributions, Humanize, Dates
-using MLDatasets: CIFAR10, MNIST
-using Random: MersenneTwister
-using Reexport: @reexport
-
-@reexport using MLToolkit
-import MLToolkit.Neural: evaluate, update!
-import MLToolkit: parse_toml, process_argdict, NeuralSampler, plot!
-
-### Scripting
-
-function parse_toml(hyperpath::String, dataset::String, modelname::String)
-    return parse_toml(hyperpath, (:dataset => dataset, :modelname => modelname))
-end
-
-function process_argdict(argdict; override=NamedTuple(), suffix="")
-    return process_argdict(
-        argdict; 
-        override=override,
-        nameexclude=[:dataset, :modelname, :n_epochs, :actlast],
-        nameinclude_last=:seed,
-        suffix=suffix
-    )
-end
-
-export parse_toml, process_argdict
-
-###
-
-include("modules.jl")
-export NeuralSampler, DenseProjector, ConvProjector, DenseDiscriminator, ConvDiscriminator
-include("models.jl")
-export GAN, MMDNet, RMMMDNet, train!, evaluate
-
-###
-
-function get_dataset(name; kwargs...)
-    args = (60_000,)
-    if name == "ring"
-        n_mixtures, distance, var = 8, 2f0, 2f-1
-        @assert args == ()
-        args = (args..., n_mixtures, distance, var)
-    end
-    return Dataset(name, args...; kwargs...)
-end
-
-function plot!(d::Dataset, g::NeuralSampler, f::Projector)
-    rng = MersenneTwister(1)
-    Xdata = d.train
-    Xgen = rand(rng, g, last(size(Xdata)))
-    fXdata = f(Xdata) |> cpu
-    fXgen = f(Xgen) |> cpu
-    plt.scatter(fXdata[1,:], fXdata[2,:], marker=".", label="data", alpha=0.5)
-    plt.scatter(fXgen[1,:],  fXgen[2,:],  marker=".", label="gen",  alpha=0.5)
-    autoset_lim!(fXdata)
-    plt.legend(fancybox=true, framealpha=0.5)
-end
-
 
 parse_csv(T, l) = map(x -> parse(T, x), split(l, ","))
-parse_op(op::String) = eval(Symbol(op))
-parse_op(op) = op
+parse_act(op::String) = eval(Symbol(op))
+parse_act(op) = op
 
 function get_model(args::NamedTuple, dataset::Dataset)
     module_path = pathof(@__MODULE__) |> splitdir |> first |> splitdir |> first
@@ -88,8 +31,8 @@ function get_model(args::NamedTuple, dataset::Dataset)
         g = NeuralSampler(base, args.Dz, "conv", dim(dataset), relu, actlast, args.norm, args.batchsize_g)
     else
         Dhs_g = parse_csv(Int, args.Dhs_g)
-        act = parse_op(args.act)
-        actlast = parse_op(args.actlast)
+        act = parse_act(args.act)
+        actlast = parse_act(args.actlast)
         g = NeuralSampler(base, args.Dz, Dhs_g, dim(dataset), act, actlast, args.norm, args.batchsize_g)
     end
     if args.modelname == "gan"
@@ -129,27 +72,6 @@ function get_model(args::NamedTuple, dataset::Dataset)
     return m |> gpu
 end
 
-function run_exp(args; model=nothing, initonly=false)
-    seed!(args.seed)
-    
-    data = get_data(args.dataset)
-    dataloader = DataLoader(data, args.batchsize)
-
-    model = isnothing(model) ? get_model(args, data) : model
-    
-    if !initonly
-        with_logger(model.logger) do
-            train!(model, dataloader, args.n_epochs; evalevery=50)
-        end
-    end
-    
-    evaluate(model, dataloader)
-    
-    modelpath = savemodel(model)
-    
-    return dataloader, model, modelpath
-end
-
-export get_data, get_model, run_exp
+export get_data, get_model
 
 end # module
