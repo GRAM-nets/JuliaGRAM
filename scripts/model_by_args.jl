@@ -28,8 +28,8 @@ function get_model(args, dataset)
         base = GaussianNoise(Dz)
     end
     if args.Dhs_g == "conv"
-        if Dx == (28, 28) || prod(Dx) == 28 * 28
-            convnet = build_convnet_outmnist(Dz, act, actlast; isnorm=isnorm)
+        if Dx == (28, 28, 1) || prod(Dx) == 28 * 28
+            convnet = ConvNet(Dz, (28, 28, 1), act, actlast; isnorm=isnorm)
         end
         if Dx == (32, 32, 3) || prod(Dx) == 32 * 32 * 3
             convnet = build_convnet_outcifar(Dz, act, actlast; isnorm=isnorm)
@@ -57,10 +57,10 @@ function get_model(args, dataset)
                 error("Conv net is not supported for the projector of MMD-GAN.")
             else
                 Dhs_f = parse_csv(Int, args.Dhs_f)
-                fenc = Projector(DenseNet(Dx, Dhs_f, args.Df, act, identity; isnorm=isnorm))
-                fenc = Projector(DenseNet(args.Df, Dhs_f, Dx, act, identity; isnorm=isnorm))
+                f_enc = Projector(DenseNet(Dx, Dhs_f, args.Df, act, identity; isnorm=isnorm))
+                f_dec = Projector(DenseNet(args.Df, Dhs_f, Dx, act, identity; isnorm=isnorm))
             end
-            m = MMDGAN(sigma, g, fenc, fdec)
+            m = MMDGAN(sigma, g, f_enc, f_dec)
         end
         if name == "gramnet"
             if args.Dhs_f == "conv"

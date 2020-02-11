@@ -17,7 +17,7 @@ function Neural.update!(opt, m::GRAMNet, x_data)
         ratio, mmd = estimate_ratio_compute_mmd(fx_gen, fx_data; σs=m.σs)
         loss_g = mmd
         # Clip version; thanks to our reviewer
-        ratio = clamp.(ratio, 0f0, 1f9)
+        ratio = relu.(ratio)
         pearson_divergence = mean((ratio .- 1) .^ 2)
         loss_f = -pearson_divergence
         # Regularizer version
@@ -40,4 +40,4 @@ function Neural.update!(opt, m::GRAMNet, x_data)
     )
 end
 
-evaluate(m::GRAMNet, ds) = evaluate(m.g, m.fenc, ds)
+evaluate(m::GRAMNet, ds) = evaluate(m.g, m.f, ds)

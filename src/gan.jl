@@ -18,7 +18,7 @@ function Neural.update!(opt, m::GAN, x_data)
     ps_d = params(m.d)
     local ŷ_d_real, ŷ_d_fake, loss_d
     gs_d = gradient(ps_d) do
-        x_gen = rand(m.g, n_gen) * 0
+        x_gen = rand(m.g, n_gen)
         ŷ_d_real, ŷ_d_fake = m.d(x_data), m.d(x_gen)
         loss_d = (sum(BCE.(ŷ_d_real, y_real)) + sum(BCE.(ŷ_d_fake, y_fake))) / n_both
     end
@@ -32,7 +32,7 @@ function Neural.update!(opt, m::GAN, x_data)
     ps_g = params(m.g)
     local ŷ_g_fake, loss_g
     gs_g = gradient(ps_g) do
-        x_gen = rand(m.g, n_gen) * 0
+        x_gen = rand(m.g, n_gen)
         ŷ_g_fake = m.d(x_gen)
         loss_g = mean(BCE.(ŷ_g_fake, y_real))
     end

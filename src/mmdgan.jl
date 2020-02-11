@@ -1,25 +1,25 @@
 struct MMDGAN <: Trainable
     σs
     g::NeuralSampler
-    fenc::Projector
-    fdec::Projector
+    f_enc::Projector
+    f_dec::Projector
 end
 
 @functor MMDGAN
 
 function forward_and_loss(m::MMDGAN, x_data)
     x_gen = rand(m.g, last(size(x_data)))
-    fx_gen, fx_data = m.fenc(x_gen), m.fenc(x_data)
-    mmd = compute_mmd(fx_gen, fx_data; σs=m.σs, isclip=true)
+    fx_gen, fx_data = m.f_enc(x_gen), m.f_enc(x_data)
+    mmd = compute_mmd(fx_gen, fx_data; σs=m.σs, is_clip=true)
     one_side = -mean(relu.(-((mean(fx_gen; dims=2) - mean(fx_data; dims=2)))))
     return mmd, one_side, x_gen, fx_gen, fx_data
 end
 
 function Neural.update!(opt, m::MMDGAN, x_data)
-    ps_fenc, ps_fdec, ps_g = params(m.fenc), params(m.fdec), params(m.g)
+    ps_fenc, ps_fdec, ps_g = params(m.f_enc), params(m.f_dec), params(m.g)
     ps_f = params([ps_fenc..., ps_fdec...])
     
-    # 3d ring fails with λ_ae_data=λ_ae_gen=8f0
+    # NOTE: 3D ring fails with λ_ae_data=λ_ae_gen=8f0
     λ_rg, λ_ae_data, λ_ae_gen = 16f0, 8f0, 8f0
     
     # Update f
@@ -33,7 +33,7 @@ function Neural.update!(opt, m::MMDGAN, x_data)
 
     gs_f = gradient(ps_f) do
         mmd_f, one_side_f, x_gen, fx_gen, fx_data = forward_and_loss(m, x_data)
-        xtilde_gen, xtilde = m.fdec(fx_gen), m.fdec(fx_data)
+        xtilde_gen, xtilde = m.f_dec(fx_gen), m.f_dec(fx_data)
         l2 = mean((x_data - xtilde) .^ 2)
         l2_gen  = mean((x_gen  - xtilde_gen)  .^ 2)
         loss_f = -(mmd_f + λ_rg * one_side_f - λ_ae_data * l2 - λ_ae_gen * l2_gen)
@@ -41,7 +41,7 @@ function Neural.update!(opt, m::MMDGAN, x_data)
     end
     Optimise.update!(opt, ps_f, gs_f)
     
-    end # if
+    end # for
     
     # Update g
     local mmd_g, one_side_g, loss_g
@@ -63,4 +63,4 @@ function Neural.update!(opt, m::MMDGAN, x_data)
     )
 end
 
-evaluate(m::MMDGAN, ds) = evaluate(m.g, m.fenc, ds)
+evaluate(m::MMDGAN, ds) = evaluate(m.g, m.f_enc, ds)

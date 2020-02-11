@@ -1,8 +1,5 @@
 function concat_predefined_args(args)
 
-@assert args.dataset in ["gaussian", "2dring", "3dring", "mnist", "cifar10"]
-@assert args.model in ["gramnet", "mmdgan", "mmdnet", "gan"]
-
 let dataset = args.dataset, model = args.model
 
 throw_undef_error(dataset, model) = error("(dataset=$dataset, model=$model) is not defined")
