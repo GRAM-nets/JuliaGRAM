@@ -7,7 +7,7 @@ if length(ARGS) == 1
     dict = load(projectdir("_research", "tmp", first(ARGS)))
 else
     dict = Dict(
-        :dataset => "3dring",
+        :dataset => "mnist",
         :model   => "gramnet",
     )
 end
@@ -60,13 +60,10 @@ dataset = get_dataset(args.dataset; seed=args.seed)
 
 ###
 
-using Flux, MLToolkit.Neural
+using Flux, MLToolkit.Neural, GRAM
 
 # Flux.trainable(c::Conv) = (c.weight,)
 # Flux.trainable(ct::ConvTranspose) = (ct.weight,)
-
-include(srcdir("models.jl"))
-using .Models
 
 include(scriptsdir("model_by_args.jl"))
 

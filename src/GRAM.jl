@@ -1,77 +1,122 @@
 module GRAM
 
-using Statistics, LinearAlgebra, StatsFuns, Distributions, Humanize, Dates
+hello() = "Welcome to the Julia implementation of [G]enerative [Ra]tio [M]atching networks!"
 
-parse_csv(T, l) = map(x -> parse(T, x), split(l, ","))
-parse_act(op::String) = eval(Symbol(op))
-parse_act(op) = op
+using Random, Statistics, Flux, MLToolkit.Plots, MLToolkit.Datasets, MLToolkit.Neural
+using MLToolkit.Datasets: flatten
+using MLToolkit.Neural: Neural, Trainable
+using Flux: @functor, Optimise
 
-function get_model(args::NamedTuple, dataset::Dataset)
-    module_path = pathof(@__MODULE__) |> splitdir |> first |> splitdir |> first
-    logdir = "$(dataset.name)/$(args.modelname)/$(args.expname)/$(Dates.format(now(), DATETIME_FMT))"
-    logger = TBLogger("$module_path/logs/$logdir")
-    if args.opt == "adam"
-        opt = ADAM(args.lr, (args.beta1, 999f-4))
-    elseif args.opt == "rmsprop"
-        opt = RMSProp(args.lr)
-    end
-    if args.base == "uniform"
-        base = UniformNoise(args.Dz)
-    elseif args.base == "gaussian"
-        base = GaussianNoise(args.Dz)
-    end
-    if args.Dhs_g == "conv"
-        if :act in keys(args)
-            @warn "args.act is ignored"
-        end
-        if :actlast in keys(args)
-            @warn "args.actlast is ignored"
-        end
-        actlast = dataset.name == "cifar10" ? tanh : sigmoid
-        g = NeuralSampler(base, args.Dz, "conv", dim(dataset), relu, actlast, args.norm, args.batchsize_g)
-    else
-        Dhs_g = parse_csv(Int, args.Dhs_g)
-        act = parse_act(args.act)
-        actlast = parse_act(args.actlast)
-        g = NeuralSampler(base, args.Dz, Dhs_g, dim(dataset), act, actlast, args.norm, args.batchsize_g)
-    end
-    if args.modelname == "gan"
-        if args.Dhs_d == "conv"
-            d = ConvDiscriminator(dim(dataset), act, args.norm)
-        else
-            Dhs_d = parse_csv(Int, args.Dhs_d)
-            d = DenseDiscriminator(dim(dataset), Dhs_d, act, args.norm)
-        end
-        m = GAN(logger, opt, g, d)
-    else
-        sigma = args.sigma == "median" ? [] : parse_csv(Float32, args.sigma)
-        if args.modelname == "mmdnet"
-            m = MMDNet(logger, opt, sigma, g)
-        elseif args.modelname == "mmdgan"
-            @assert args.Dhs_f != "conv"
-            Dhs_f = parse_csv(Int, args.Dhs_f)
-            Dx = first(dim(dataset))
-            fenc = DenseProjector(Dx, Dhs_f, args.Df, act, args.norm)
-            fdec = DenseProjector(args.Df, Dhs_f, Dx, act, args.norm)
-            m = MMDGAN(logger, opt, sigma, g, fenc, fdec)
-        elseif args.modelname == "rmmmdnet"
-            if args.Dhs_f == "conv"
-                act = x -> leakyrelu(x, 2f-1)
-                if :act in keys(args)
-                    @warn "args.act is ignored"
-                end
-                f = ConvProjector(dim(dataset), args.Df, act, args.norm)
-            else
-                Dhs_f = parse_csv(Int, args.Dhs_f)
-                f = DenseProjector(dim(dataset), Dhs_f, args.Df, act, args.norm)
-            end
-            m = RMMMDNet(logger, opt, sigma, g, f)
-        end
-    end
-    @info "Init $(args.modelname) with $(nparams(m) |> Humanize.digitsep) parameters" logdir
-    return m |> gpu
+### Hacks for gradient of A \ B
+
+using Flux: CuArrays, Zygote
+using Flux.CuArrays: CuMatOrAdj, CuOrAdj
+
+Zygote.@adjoint Base.:\(A::CuMatOrAdj, B::CuOrAdj) = A \ B, function (Δ)
+    AtransposedivΔ = transpose(A) \ Δ
+    ∇A = transpose(A \ B * transpose(-AtransposedivΔ))
+    return (∇A,  AtransposedivΔ)
 end
 
-export get_data, get_model
+### Modules
+
+using Distributions: Distributions
+using Random: GLOBAL_RNG
+
+# Neural sampler
+
+struct NeuralSampler
+    base
+    f
+end
+
+@functor NeuralSampler
+
+Distributions.rand(rng::AbstractRNG, g::NeuralSampler, n::Int) = g.f(rand(rng, g.base, n))
+Distributions.rand(g::NeuralSampler, n::Int) = rand(GLOBAL_RNG, g, n)
+
+# Projector
+
+struct Projector
+    f
+end
+
+@functor Projector
+
+(p::Projector)(x) = p.f(x)
+
+# Conv out for CIFAR10
+
+using MLToolkit.Neural: optional_BatchNorm
+
+function build_convnet_outcifar(Din::Int, σs; isnorm::Bool=false)
+    @assert length(σs) == 4 "Length of `σs` must be `4` for `build_convnet_outcifar10`"
+    return Chain(
+        #     Din x B
+        Dense(Din,  2048), 
+        # -> 2048 x B
+        x -> reshape(x, 4, 4, 128, size(x, 2)), 
+        optional_BatchNorm(128, σs[1], isnorm; momentum=9f-1),
+        # ->    4 x  4 x 128 x B
+        ConvTranspose((4, 4), 128 => 64; stride=(2, 2), pad=(1, 1)), 
+        optional_BatchNorm(64, σs[2], isnorm; momentum=9f-1),
+        # ->    8 x  8 x  64 x B        
+        ConvTranspose((4, 4),  64 => 32; stride=(2, 2), pad=(1, 1)), 
+        optional_BatchNorm(32, σs[3], isnorm; momentum=9f-1),
+        # ->   16 x 16 x  64 x B
+        ConvTranspose((4, 4),  32 =>  3; stride=(2, 2), pad=(1, 1)), x -> σs[4].(x)
+        # ->   32 x 32 x   3 x B
+    )
+end
+
+build_convnet_outcifar(Din::Int, σ::Function, σlast::Function; kwargs...) = 
+    build_convnet_outcifar(Din, (σ, σ, σ, σlast); kwargs...)
+
+export NeuralSampler, Projector, build_convnet_outcifar
+
+###
+
+include("mmd_utilities.jl")
+
+include("gramnet.jl")
+export GRAMNet
+include("mmdgan.jl")
+export MMDGAN
+include("mmdnet.jl")
+export MMDNet
+include("gan.jl")
+export GAN
+
+###
+
+using WeightsAndBiasLogger: wandb
+
+function evaluate(g, ds)
+    rng = MersenneTwister(1)
+    nd_half = div(ds.n_display, 2)
+    x_data, x_gen = gpu(ds.Xt[:,1:nd_half]), rand(rng, g, nd_half)
+    fig_g = ds.vis((data=flatten(cpu(x_data)), gen=flatten(cpu(x_gen))))
+    return (fig_gen=wandb.Image(fig_g),)
+end
+
+function evaluate(g, f::Projector, ds)
+    rng = MersenneTwister(1)
+    nd_half = div(ds.n_display, 2)
+    # Generator
+    x_data, x_gen = gpu(ds.Xt[:,1:nd_half]), rand(rng, g, nd_half)
+    fig_g = ds.vis((data=flatten(cpu(x_data)), gen=flatten(cpu(x_gen))))
+    # Projector
+    fx_data, fx_gen = f(x_data), f(x_gen)
+    if size(fx_data, 1) in [2, 3]   # only visualise projector if its output dim is 2
+        fig_f = plot(Scatter((data=cpu(fx_data), gen=cpu(fx_gen))))
+        return (fig_gen=wandb.Image(fig_g), fig_proj=wandb.Image(fig_f))
+    else
+        return (fig_gen=wandb.Image(fig_g),)
+    end
+end
+
+export evaluate
+
+export GRAM
 
 end # module

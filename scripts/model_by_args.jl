@@ -1,6 +1,6 @@
 using Humanize, Flux, MLToolkit.Neural, MLToolkit.DistributionsX
 
-parse_csv(T, l) = map(x -> parse(T, x), split(l, ","))
+parse_csv(T, l) = tuple(map(x -> parse(T, x), split(l, ","))...)
 parse_act(op::String) = eval(Symbol(op))
 parse_act(op) = op
 
@@ -37,14 +37,14 @@ function get_model(args, dataset)
         g = NeuralSampler(base, convnet)
     else
         Dhs_g = parse_csv(Int, args.Dhs_g)
-        g = NeuralSampler(base, DenseNet(Dz, Dhs_g, Dx, act, actlast; isnorm=isnorm))
+        g = NeuralSampler(base, DenseNet(Dz, Dhs_g, prod(Dx), act, actlast; isnorm=isnorm))
     end
     if name == "gan"
         if args.Dhs_d == "conv"
             d = Projector(ConvNet(WHC(Dx), 1, act, sigmoid; isnorm=isnorm))
         else
             Dhs_d = parse_csv(Int, args.Dhs_d)
-            d = Projector(DenseNet(Dx, Dhs_d, 1, act, sigmoid; isnorm=isnorm).f)
+            d = Projector(DenseNet(prod(Dx), Dhs_d, 1, act, sigmoid; isnorm=isnorm).f)
         end
         m = GAN(g, d)
     else
@@ -57,8 +57,8 @@ function get_model(args, dataset)
                 error("Conv net is not supported for the projector of MMD-GAN.")
             else
                 Dhs_f = parse_csv(Int, args.Dhs_f)
-                f_enc = Projector(DenseNet(Dx, Dhs_f, args.Df, act, identity; isnorm=isnorm))
-                f_dec = Projector(DenseNet(args.Df, Dhs_f, Dx, act, identity; isnorm=isnorm))
+                f_enc = Projector(DenseNet(prod(Dx), Dhs_f, args.Df, act, identity; isnorm=isnorm))
+                f_dec = Projector(DenseNet(args.Df, Dhs_f, prod(Dx), act, identity; isnorm=isnorm))
             end
             m = MMDGAN(sigma, g, f_enc, f_dec)
         end
@@ -67,7 +67,7 @@ function get_model(args, dataset)
                 f = Projector(ConvNet(WHC(Dx), args.Df, act, identity; isnorm=isnorm))
             else
                 Dhs_f = parse_csv(Int, args.Dhs_f)
-                f = Projector(DenseNet(Dx, Dhs_f, args.Df, act, identity; isnorm=isnorm))
+                f = Projector(DenseNet(prod(Dx), Dhs_f, args.Df, act, identity; isnorm=isnorm))
             end
             m = GRAMNet(sigma, g, f)
         end

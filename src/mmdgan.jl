@@ -1,5 +1,5 @@
-struct MMDGAN <: Trainable
-    σs
+struct MMDGAN{T} <: Trainable
+    σs::T
     g::NeuralSampler
     f_enc::Projector
     f_dec::Projector
@@ -10,7 +10,7 @@ end
 function forward_and_loss(m::MMDGAN, x_data)
     x_gen = rand(m.g, last(size(x_data)))
     fx_gen, fx_data = m.f_enc(x_gen), m.f_enc(x_data)
-    mmd = compute_mmd(fx_gen, fx_data; σs=m.σs, is_clip=true)
+    mmd = compute_mmd(fx_gen, fx_data, m.σs)
     one_side = -mean(relu.(-((mean(fx_gen; dims=2) - mean(fx_data; dims=2)))))
     return mmd, one_side, x_gen, fx_gen, fx_data
 end
