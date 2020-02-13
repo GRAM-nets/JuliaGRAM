@@ -278,6 +278,12 @@ git-tree-sha1 = "5c49dab19938b119fe204fd7d7e8e174f4e9c68b"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 version = "0.8.8"
 
+[[Humanize]]
+deps = ["Dates", "Printf", "Test"]
+git-tree-sha1 = "f7f2a0a920ad015da58d016587aaf4af4fa6ad5e"
+uuid = "7ec9b9c5-1998-51e1-b7fc-fc3590c18259"
+version = "1.0.0"
+
 [[IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
 git-tree-sha1 = "1a4355e4b5b50be2311ebb644f34f3306dbd0410"
@@ -385,7 +391,7 @@ uuid = "66a33bbf-0c2b-5fc8-a008-9da813334f0a"
 version = "0.5.1"
 
 [[MLToolkit]]
-deps = ["ArgParse", "BSON", "Bijectors", "CuArrays", "Dates", "Distances", "Distributions", "DrWatson", "Flux", "GSL", "LinearAlgebra", "MLDataUtils", "MLDatasets", "NNlib", "Parameters", "Pkg", "ProgressMeter", "PyCall", "PyPlot", "Random", "Reexport", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test", "Tracker", "Zygote"]
+deps = ["ArgParse", "BSON", "Bijectors", "CuArrays", "Dates", "Distances", "Distributions", "DrWatson", "Flux", "GSL", "Humanize", "LinearAlgebra", "MLDataUtils", "MLDatasets", "NNlib", "Parameters", "Pkg", "ProgressMeter", "PyCall", "PyPlot", "Random", "Reexport", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test", "Tracker", "Zygote"]
 path = "/afs/inf.ed.ac.uk/user/s16/s1672897/projects/MLToolkit.jl/"
 uuid = "519e820e-097c-11e9-2274-1b004aeb0b9b"
 version = "0.3.0"
@@ -661,8 +667,8 @@ uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
 version = "1.2.0"
 
 [[WeightsAndBiasLogger]]
-deps = ["PyCall"]
-git-tree-sha1 = "fdb087bcd7b251ccbda2b2cb73630443ab0726ed"
+deps = ["PyCall", "PyPlot"]
+git-tree-sha1 = "86f812d4b72658295a65a36c69e1abdfa84cd558"
 repo-rev = "master"
 repo-url = "https://github.com/xukai92/WeightsAndBiasLogger.jl.git"
 uuid = "71805093-c1fc-4af5-8d0a-8dde53c6ac46"
