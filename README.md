@@ -28,7 +28,8 @@ please check them [here](https://app.wandb.ai/xukai92/gram).
         - `--exp 2` for Figure 2 (and Figure 7 in the appendix), or
         - `--exp 3` for Figure 8 in the appendix.
     - You can also adjust the parameter sweep in `master.jl` by yourself.
-    - If you want to run multiple trainings in parallel, please add `JULIA_NUM_THREADS=$N_PARALLEL ` to the beginning of the command (with a space), where `N_PARALLEL` is the number of parallel trainings you want to run.
+    - If you want to run multiple trainings in parallel, please append `JULIA_NUM_THREADS=$N_PARALLEL ` to the beginning of the command (with a space), where `N_PARALLEL` is the number of parallel trainings you want to run.
+      - By default the script uses 2 GPUs for parallelism. You can add `--n_gpus $N_GPUS` to the command to control the number.
 
 You can also modify the arguments in `scripts/gram.jl` and run the file on its own by `julia $GRAM_DIR/scripts/gram.jl`
 
