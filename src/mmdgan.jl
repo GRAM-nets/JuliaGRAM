@@ -1,8 +1,8 @@
 struct MMDGAN{T} <: Trainable
     σs::T
     g::NeuralSampler
-    f_enc::Projector
-    f_dec::Projector
+    f_enc
+    f_dec
 end
 
 @functor MMDGAN

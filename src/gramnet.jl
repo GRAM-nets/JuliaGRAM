@@ -1,7 +1,7 @@
 struct GRAMNet{T} <: Trainable
     σs::T
     g::NeuralSampler
-    f::Projector
+    f
 end
 
 @functor GRAMNet

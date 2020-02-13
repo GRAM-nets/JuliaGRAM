@@ -1,71 +1,59 @@
-using Distributed
-addprocs(9)
+using DrWatson
+@quickactivate "GRAM"
+using ArgParse
 
-@everywhere using GRAM
-
-###
-
-grampath = pathof(GRAM) |> splitdir |> first |> splitdir |> first
-hyperpath = "$grampath/examples/Hyper.toml"
-
-function get_args_list_varying_Df(model="rmmmdnet")
-    args_list = []
-    for dataset in [
-#         "gaussian", 
-        "ring"
-    ], Df in [2, 4, 8, 16]
-        argdict = parse_toml(hyperpath, dataset, model)
-        args = process_argdict(
-            argdict; 
-            override=(Df=Df,), 
-            suffix="varying_Df"
-        )
-        push!(args_list, args)
-    end
-    return args_list
+s = ArgParseSettings()
+@add_arg_table! s begin
+    "--exp"
+        arg_type = Int
+        required = true
+    "--nowandb"
+        action = :store_true
 end
+args = dict2ntuple(parse_args(s))
 
-function get_args_list_varying_Dz_and_Dhs_g(dataset)
-    Dhs_g_list_dict = Dict(
-        "gaussian" => ["10,10", "50,50", "100,100"],
-        "ring" => ["20,20", "100,100", "200,200"],
+@info "Master arguments" args...
+
+if args.exp == 1    # Figure 1, 6 & 9
+    general_args = Dict(
+        :notes        => "Varying Df",
+        :dataset      => ["2dring", "3dring"],
+        :model        => ["gramnet", "mmdgan"],
+        :Df           => [2, 4, 8, 16],
+        :nowandb      => args.nowandb,
+        :isclip_ratio => false,
     )
-    args_list = []
-    for modelname in [
-        "gan", 
-        "mmdnet", 
-        "rmmmdnet",
-        "mmdgan",
-    ], Dz in [
-        2, 
-        4, 
-        8, 
-        16
-    ], Dhs_g in Dhs_g_list_dict[dataset]
-        argdict = parse_toml(hyperpath, dataset, modelname)
-        args = process_argdict(
-            argdict; 
-            override=(Dz=Dz, Dhs_g=Dhs_g), 
-            suffix="varying_Dz_and_Dhs_g"
-        )
-        push!(args_list, args)
-    end
-    return args_list
 end
 
-# Figure 1
-args_list = get_args_list_varying_Df("mmdgan")
+if args.exp == 2    # Figure 2 & 7
+    general_args = Dict(
+        :notes        => "Varying Dz and Dhs_g",
+        :dataset      => ["2dring", "3dring"],
+        :model        => ["gramnet", "mmdgan", "mmdnet", "gan"],
+        :Dz           => [2, 4, 8, 16],
+        :Dhs_g        => ["20,20", "100,100", "200,200"],
+        :nowandb      => args.nowandb,
+        :isclip_ratio => false,
+    )
+end
 
-# Figure 2
-# dataset = "gaussian"
-# dataset = "ring"
-# args_list = get_args_list_varying_Dz_and_Dhs_g(dataset)
+if args.exp == 3    # Figure 8
+    general_args = Dict(
+        :notes        => "MNIST",
+        :dataset      => "mnist",
+        :model        => "gramnet",
+        :lr           => 1f-3,
+        :Dhs_g        => "600,600,800",
+        :Dhs_f        => "conv",
+        :sigma        => "0.1,1,10,100",
+        :nowandb      => args.nowandb,
+        :isclip_ratio => false,
+    )
+end
 
-# Appendix: GRAM-net on MNIST
-# args_list = [parseargdict(parsetoml(hyperpath, "mnist", "rmmmdnet"); override=(lr=1f-3, Dhs_g="600,600,800", Df_h="conv", sigma="0.1,1,10,100",))]
-
-###
-
-@sync @distributed for args in args_list
-    run_exp(args)
+dicts = dict_list(general_args)
+paths = tmpsave(dicts)
+Threads.@threads for (p, d) in collect(zip(paths, dicts))
+    submit = `julia $(scriptsdir("gram.jl")) $p`
+    run(submit)
 end

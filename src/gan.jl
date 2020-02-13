@@ -3,7 +3,7 @@ const BCE = binarycrossentropy
 
 struct GAN <: Trainable
     g::NeuralSampler
-    d::Projector
+    d
 end
 
 @functor GAN

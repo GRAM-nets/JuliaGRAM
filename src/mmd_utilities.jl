@@ -15,6 +15,7 @@ mmd²of(Kdede, Kdenu, Knunu) = mean(Kdede) - 2mean(Kdenu) + mean(Knunu)
 
 const EPS_RATIO = 1f-3
 const CLIP_LOWER, CLIP_UPPER = 0f0, 1f9
+
 clip(x) = clamp.(x, CLIP_LOWER, CLIP_UPPER)
 
 function compute_mmd(x_de, x_nu, σs)
