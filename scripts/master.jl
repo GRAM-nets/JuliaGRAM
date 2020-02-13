@@ -7,6 +7,9 @@ s = ArgParseSettings()
     "--exp"
         arg_type = Int
         required = true
+    "--n_gpus"
+        arg_type = Int
+        default  = 2
     "--nowandb"
         action = :store_true
 end
@@ -54,6 +57,6 @@ end
 dicts = dict_list(general_args)
 paths = tmpsave(dicts)
 Threads.@threads for (p, d) in collect(zip(paths, dicts))
-    submit = `julia $(scriptsdir("gram.jl")) $p`
+    submit = `CUDA_VISIBLE_DEVICES=$(Threads.threadid() % args.n_gpus) julia $(scriptsdir("gram.jl")) $p`
     run(submit)
 end
