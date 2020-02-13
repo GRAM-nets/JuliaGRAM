@@ -9,6 +9,7 @@ else
     dict = Dict(
         :dataset => "mnist",
         :model   => "gramnet",
+        :nowandb => false,
     )
 end
 
@@ -16,6 +17,7 @@ args_ignored = (
     n_epochs    = 10,
     evalevery   = 100,
     is_continue = false,
+    nowandb     = dict[:nowandb],
 )
 
 args = (args_ignored...,
@@ -31,14 +33,24 @@ args = (args_ignored...,
 include(scriptsdir("predefined_args.jl"))
 args = concat_predefined_args(args)
 
+if args.model == "gramnet"
+    kwargs = (isclip_ratio=true,)
+end
+
+args = dict2ntuple(Dict(union(ntuple2dict.((args, kwargs))...)...))
+
 @info "Arguments" args...
 
 ###
 
-using WeightsAndBiasLogger
+using Logging, WeightsAndBiasLogger
 
-logger = WBLogger(; project=projectname())
-config!(logger, args; ignores=keys(args_ignored))
+if args.nowandb
+    logger = NullLogger()
+else
+    logger = WBLogger(; project=projectname())
+    config!(logger, args; ignores=keys(args_ignored))
+end
 
 ###
 
@@ -99,7 +111,7 @@ args.is_continue && loadparams!(model, joinpath(modeldir, "model.bson"))
 
 with(logger) do
     train!(
-        opt, model, dataset.X, args.n_epochs, args.batch_size;
+        opt, model, dataset.X, args.n_epochs, args.batch_size; kwargs...,
         evalevery=args.evalevery, cbeval=cbeval, 
         # savedir=modeldir
     )

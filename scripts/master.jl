@@ -62,7 +62,7 @@ args_list = get_args_list_varying_Df("mmdgan")
 # args_list = get_args_list_varying_Dz_and_Dhs_g(dataset)
 
 # Appendix: GRAM-net on MNIST
-# args_list = [parseargdict(parsetoml(hyperpath, "mnist", "rmmmdnet"); override=(lr=1f-3, Df_h="conv", sigma="0.1,1,10,100",))]
+# args_list = [parseargdict(parsetoml(hyperpath, "mnist", "rmmmdnet"); override=(lr=1f-3, Dhs_g="600,600,800", Df_h="conv", sigma="0.1,1,10,100",))]
 
 ###
 
