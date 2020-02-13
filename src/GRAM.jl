@@ -7,17 +7,6 @@ using MLToolkit.Datasets: flatten
 using MLToolkit.Neural: Neural, Trainable
 using Flux: @functor, Optimise
 
-### Hacks for gradient of A \ B
-
-using Flux: CuArrays, Zygote
-using Flux.CuArrays: CuMatOrAdj, CuOrAdj
-
-Zygote.@adjoint Base.:\(A::CuMatOrAdj, B::CuOrAdj) = A \ B, function (Δ)
-    AtransposedivΔ = transpose(A) \ Δ
-    ∇A = transpose(A \ B * transpose(-AtransposedivΔ))
-    return (∇A,  AtransposedivΔ)
-end
-
 ### Modules
 
 using Distributions: Distributions
@@ -89,14 +78,12 @@ export GAN
 
 ###
 
-using WeightsAndBiasLogger: wandb
-
 function evaluate(g, ds)
     rng = MersenneTwister(1)
     nd_half = div(ds.n_display, 2)
     x_data, x_gen = gpu(ds.Xt[:,1:nd_half]), rand(rng, g, nd_half)
     fig_g = ds.vis((data=flatten(cpu(x_data)), gen=flatten(cpu(x_gen))))
-    return (fig_gen=wandb.Image(fig_g),)
+    return (fig_gen=fig_g,)
 end
 
 function evaluate(g, f::Projector, ds)
@@ -109,9 +96,9 @@ function evaluate(g, f::Projector, ds)
     fx_data, fx_gen = f(x_data), f(x_gen)
     if size(fx_data, 1) in [2, 3]   # only visualise projector if its output dim is 2
         fig_f = plot(Scatter((data=cpu(fx_data), gen=cpu(fx_gen))))
-        return (fig_gen=wandb.Image(fig_g), fig_proj=wandb.Image(fig_f))
+        return (fig_gen=fig_g, fig_proj=fig_f)
     else
-        return (fig_gen=wandb.Image(fig_g),)
+        return (fig_gen=fig_g,)
     end
 end
 

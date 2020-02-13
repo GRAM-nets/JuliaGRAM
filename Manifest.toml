@@ -278,12 +278,6 @@ git-tree-sha1 = "5c49dab19938b119fe204fd7d7e8e174f4e9c68b"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 version = "0.8.8"
 
-[[Humanize]]
-deps = ["Dates", "Printf", "Test"]
-git-tree-sha1 = "f7f2a0a920ad015da58d016587aaf4af4fa6ad5e"
-uuid = "7ec9b9c5-1998-51e1-b7fc-fc3590c18259"
-version = "1.0.0"
-
 [[IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
 git-tree-sha1 = "1a4355e4b5b50be2311ebb644f34f3306dbd0410"

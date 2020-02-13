@@ -31,6 +31,8 @@ args = (args_ignored...,
 include(scriptsdir("predefined_args.jl"))
 args = concat_predefined_args(args)
 
+@info "Arguments" args...
+
 ###
 
 using WeightsAndBiasLogger
@@ -52,6 +54,9 @@ function get_dataset(name; kwargs...)
         if name == "3dring"
             args = (args..., Float32(pi / 3), 1f-1, n_mixtures, distance, var)
         end
+    end
+    if name == "mnist"
+        kwargs = (kwargs..., is_flatten=true, alpha=0f0, is_link=false)
     end
     return Dataset(name, args...; kwargs...)
 end
@@ -95,6 +100,7 @@ args.is_continue && loadparams!(model, joinpath(modeldir, "model.bson"))
 with(logger) do
     train!(
         opt, model, dataset.X, args.n_epochs, args.batch_size;
-        evalevery=args.evalevery, cbeval=cbeval, savedir=modeldir
+        evalevery=args.evalevery, cbeval=cbeval, 
+        # savedir=modeldir
     )
 end

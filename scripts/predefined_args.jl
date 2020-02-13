@@ -93,7 +93,7 @@ if dataset == "mnist"
     args = (args..., 
         base    = "uniform",
         Dz      = 100,
-        Dhs_g   = "200,400,800",
+        Dhs_g   = "600,600,800",
         act     = "relu",
         actlast = "sigmoid",
         isnorm  = true,
@@ -103,7 +103,7 @@ if dataset == "mnist"
             opt   = "adam",
             lr    = 1f-3,
             beta1 = 5f-1,
-            sigma = "0.1,1,10",
+            sigma = "0.1,1,10,100",
             Dhs_f = "conv",
             Df    = 100,
         )

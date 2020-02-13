@@ -1,4 +1,4 @@
-using Humanize, Flux, MLToolkit.Neural, MLToolkit.DistributionsX
+using Flux, MLToolkit.Neural, MLToolkit.DistributionsX
 
 parse_csv(T, l) = tuple(map(x -> parse(T, x), split(l, ","))...)
 parse_act(op::String) = eval(Symbol(op))
@@ -72,6 +72,6 @@ function get_model(args, dataset)
             m = GRAMNet(sigma, g, f)
         end
     end
-    @info "Init $name with $(nparams(m) |> Humanize.digitsep) parameters"
+    @info "Init $name with $(nparams(m)) parameters"
     return m
 end
