@@ -57,7 +57,7 @@ end
 dicts = dict_list(general_args)
 paths = tmpsave(dicts)
 Threads.@threads for (p, d) in collect(zip(paths, dicts))
-    withenv("CUDA_VISIBLE_DEVICES" => (Threads.threadid() % args.n_gpus) ) do
+    withenv("CUDA_VISIBLE_DEVICES" => (Threads.threadid() % args.n_gpus)) do
         run(`julia $(scriptsdir("gram.jl")) $p`)
     end
 end
