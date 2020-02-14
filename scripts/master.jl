@@ -17,7 +17,7 @@ args = dict2ntuple(parse_args(s))
 
 @info "Master arguments" args...
 
-if args.exp == 1    # Figure 1, 6 & 9
+if args.exp == 1    # Figure 1, 6 & 9; 16 runs
     general_args = Dict(
         :notes        => "Varying Df",
         :dataset      => ["2dring", "3dring"],
@@ -28,7 +28,7 @@ if args.exp == 1    # Figure 1, 6 & 9
     )
 end
 
-if args.exp == 2    # Figure 2 & 7
+if args.exp == 2    # Figure 2 & 7; 96 runs
     general_args = Dict(
         :notes        => "Varying Dz and Dhs_g",
         :dataset      => ["2dring", "3dring"],
@@ -40,7 +40,7 @@ if args.exp == 2    # Figure 2 & 7
     )
 end
 
-if args.exp == 3    # Figure 8
+if args.exp == 3    # Figure 8; 1 run
     general_args = Dict(
         :notes        => "MNIST",
         :dataset      => "mnist",
