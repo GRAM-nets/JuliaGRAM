@@ -36,3 +36,9 @@ You can also modify the arguments in `scripts/gram.jl` and run the file on its o
 Our code by default logs all the training details using [Weights & Biases](https://www.wandb.ai/), 
 please install W&B and set it up following [here](https://docs.wandb.com/quickstart). 
 Or if you don't want to log things, add `--nowandb`.
+
+---
+
+| Maintainer |
+| :-: |
+| [Kai Xu](http://xuk.ai/) |
