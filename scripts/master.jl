@@ -45,6 +45,7 @@ if args.exp == 3    # Figure 8; 1 run
         :notes        => "MNIST",
         :dataset      => "mnist",
         :model        => "gramnet",
+        :n_epochs     => 20,
         :lr           => 1f-3,
         :Dhs_g        => "600,600,800",
         :Dhs_f        => "conv",
