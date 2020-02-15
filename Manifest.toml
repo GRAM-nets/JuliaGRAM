@@ -171,12 +171,6 @@ uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
-[[DensityRatioEstimation]]
-deps = ["LinearAlgebra", "Parameters", "Requires", "Statistics", "StatsBase"]
-path = "/afs/inf.ed.ac.uk/user/s16/s1672897/projects/DensityRatioEstimation.jl/"
-uuid = "ab46fb84-d57c-11e9-2f65-6f72e4a7229f"
-version = "0.4.0"
-
 [[DiffResults]]
 deps = ["StaticArrays"]
 git-tree-sha1 = "da24935df8e0c6cf28de340b958f6aac88eaa0cc"
@@ -185,9 +179,9 @@ version = "1.0.2"
 
 [[DiffRules]]
 deps = ["NaNMath", "Random", "SpecialFunctions"]
-git-tree-sha1 = "10dca52cf6d4a62d82528262921daf63b99704a2"
+git-tree-sha1 = "eb0c34204c8410888844ada5359ac8b96292cfd1"
 uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
-version = "1.0.0"
+version = "1.0.1"
 
 [[Distances]]
 deps = ["LinearAlgebra", "Statistics"]
@@ -394,11 +388,11 @@ version = "0.5.1"
 
 [[MLToolkit]]
 deps = ["ArgParse", "BSON", "Bijectors", "CuArrays", "Dates", "Distances", "Distributions", "DrWatson", "Flux", "GSL", "Humanize", "LinearAlgebra", "MLDataUtils", "MLDatasets", "NNlib", "Parameters", "Pkg", "ProgressMeter", "PyCall", "PyPlot", "Random", "Reexport", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test", "Tracker", "Zygote"]
-git-tree-sha1 = "8bb5fc33a9d6924aabf584cee6bcc3ace653c451"
+git-tree-sha1 = "b4841866da4705b9143d573ae3fb36c484153471"
 repo-rev = "master"
 repo-url = "git@github.com:xukai92/MLToolkit.jl.git"
 uuid = "519e820e-097c-11e9-2274-1b004aeb0b9b"
-version = "0.4.0"
+version = "0.4.1"
 
 [[MacroTools]]
 deps = ["DataStructures", "Markdown", "Random"]
@@ -582,9 +576,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[SpecialFunctions]]
 deps = ["OpenSpecFun_jll"]
-git-tree-sha1 = "268052ee908b2c086cc0011f528694f02f3e2408"
+git-tree-sha1 = "e19b98acb182567bcb7b75bb5d9eedf3a3b5ec6c"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "0.9.0"
+version = "0.10.0"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
@@ -604,9 +598,9 @@ version = "0.32.0"
 
 [[StatsFuns]]
 deps = ["Rmath", "SpecialFunctions"]
-git-tree-sha1 = "79982835d2ff3970685cb704500909c94189bde9"
+git-tree-sha1 = "f290ddd5fdedeadd10e961eb3f4d3340f09d030a"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "0.9.3"
+version = "0.9.4"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -671,11 +665,11 @@ version = "1.2.0"
 
 [[WeightsAndBiasLogger]]
 deps = ["PyCall", "PyPlot"]
-git-tree-sha1 = "86f812d4b72658295a65a36c69e1abdfa84cd558"
+git-tree-sha1 = "cc36f12c648976ab92e46c6705bef95ddf5f9dab"
 repo-rev = "master"
 repo-url = "https://github.com/xukai92/WeightsAndBiasLogger.jl.git"
 uuid = "71805093-c1fc-4af5-8d0a-8dde53c6ac46"
-version = "0.3.0"
+version = "0.3.1"
 
 [[ZipFile]]
 deps = ["Libdl", "Printf", "Zlib_jll"]

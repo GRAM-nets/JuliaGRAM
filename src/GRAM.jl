@@ -26,23 +26,21 @@ export NeuralSampler
 
 ###
 
-include("mmd_utilities.jl")
-
+include("kmm.jl")   # MMD computation and density ratio estimation via KMM
 include("gramnet.jl")
-export GRAMNet
 include("mmdgan.jl")
-export MMDGAN
 include("mmdnet.jl")
-export MMDNet
 include("gan.jl")
-export GAN
+export GRAMNet, MMDGAN, MMDNet, GAN
 
 evaluate(g, ds) = evaluate(g, nothing, ds)
 function evaluate(g, f, ds; rng=MersenneTwister(1))
     nd_half = div(ds.n_display, 2)
+
     # Generator
     x_data, x_gen = gpu(ds.Xt[:,1:nd_half]), rand(rng, g, nd_half)
     fig_g = ds.vis((data=flatten(cpu(x_data)), gen=flatten(cpu(x_gen))))
+    
     # Projector
     if !isnothing(f)
         fx_data, fx_gen = f(x_data), f(x_gen)

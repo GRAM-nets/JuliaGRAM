@@ -44,7 +44,7 @@ kwargs = args.model == "gramnet" ? (isclip_ratio=true,) : NamedTuple()
 length(kwargs) > 0 && (args = union(args, kwargs))
 
 # Overwrite arguments from master
-args = overwirte(args, argdict_master)
+args = overwrite(args, argdict_master)
 
 @info "Arguments" args...
 
