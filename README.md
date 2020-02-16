@@ -6,7 +6,7 @@ This is the source code for the paper [Generative Ratio Matching Networks](https
 
 Our experiments are logged by [WeightsAndBiasLogger.jl](https://github.com/xukai92/WeightsAndBiasLogger.jl), 
 a Julia interface for [Weights & Biases](https://www.wandb.ai/), 
-please check them [here](https://app.wandb.ai/xukai92/gram).
+please check them [here](https://app.wandb.ai/xukai92/gram-public).
 
 ## How to run the code?
 
