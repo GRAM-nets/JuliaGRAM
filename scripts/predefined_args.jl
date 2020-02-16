@@ -133,7 +133,7 @@ if dataset == "cifar10"
         base    = "uniform",
         Dz      = 150,
         Dhs_g   = "conv",
-        act     = "x -> leakyrelu(x, 2f-1)",
+        act     = :(x -> leakyrelu(x, 2f-1)),
         actlast = "identity",
         isnorm  = true,
         opt     = "adam",
