@@ -388,11 +388,11 @@ version = "0.5.1"
 
 [[MLToolkit]]
 deps = ["ArgParse", "BSON", "Bijectors", "CuArrays", "Dates", "Distances", "Distributions", "DrWatson", "Flux", "GSL", "Humanize", "LinearAlgebra", "MLDataUtils", "MLDatasets", "NNlib", "Parameters", "Pkg", "ProgressMeter", "PyCall", "PyPlot", "Random", "Reexport", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test", "Tracker", "Zygote"]
-git-tree-sha1 = "b4841866da4705b9143d573ae3fb36c484153471"
+git-tree-sha1 = "2831fb3e4f7d22a94041ab68e3e472efa772b8c1"
 repo-rev = "master"
 repo-url = "git@github.com:xukai92/MLToolkit.jl.git"
 uuid = "519e820e-097c-11e9-2274-1b004aeb0b9b"
-version = "0.4.1"
+version = "0.4.2"
 
 [[MacroTools]]
 deps = ["DataStructures", "Markdown", "Random"]
