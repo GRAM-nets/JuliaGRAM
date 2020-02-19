@@ -37,6 +37,23 @@ Our code by default logs all the training details using [Weights & Biases](https
 please install W&B and set it up following [here](https://docs.wandb.com/quickstart). 
 Or if you don't want to log things, add `--nowandb`.
 
+## Interact with the a pre-trained GRAM network on CIFAR10
+
+We provide a pre-trained model using this Julia version of GRAM networks at `demo/cifar10-gramnet.bson`.
+You can use the provided Jupyter notebook at `demo/interact.ipynb` to interact with our pre-trained GRAM network.
+
+**NOTE**: This is NOT the exact code we used for the CIFAR10 experiment in our paper. 
+For reproducibility of paper on those experiments, please check [GRAMFlow](https://github.com/GRAM-nets/GRAMFlow).
+
+### A small quiz
+
+We generated 50 images from our GRAM network and mixed them with 50 real images. Can you tell the generated ones from sampled ones?
+
+![](images/gram-question.png)
+
+Click [here](images/gram-answer.png) to see the answers. 
+How many mistakes did you make?
+
 ---
 
 | Maintainer |
