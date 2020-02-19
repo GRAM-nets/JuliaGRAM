@@ -6,12 +6,14 @@ end
 
 @functor GRAMNet
 
-function Neural.update!(opt, m::GRAMNet, x_data; isclip_ratio=false, monitor_sqd=false)
+function Neural.update!(opt, m::GRAMNet, x_data; isclip_ratio=false, lambda=1f0, ismonitor_sqd=false)
+    batch_size = last(size(x_data))
+
     # Update f and g
     ps_f, ps_g = params(m.f), params(m.g)
-    local x_gen, ratio, mmd, pearson_divergence, loss_f, loss_g, raito_mean
+    local x_gen, ratio, mmd, pearson_divergence, loss_f, loss_g, ratio_sum
     gs_f, gs_g = gradient(ps_f, ps_g) do
-        x_gen = rand(m.g, last(size(x_data)))
+        x_gen = rand(m.g, batch_size)
         fx_gen, fx_data = m.f(x_gen), m.f(x_data)
         ratio, mmd = estimate_ratio_compute_mmd(
             fx_gen, fx_data, m.σs; 
@@ -22,8 +24,8 @@ function Neural.update!(opt, m::GRAMNet, x_data; isclip_ratio=false, monitor_sqd
         loss_f = -pearson_divergence
         # We add a positivity regularizer if the ratio is not clipped
         if !isclip_ratio
-            raito_mean = mean(ratio)
-            loss_f -= raito_mean
+            ratio_sum = sum(ratio)
+            loss_f -= lambda * ratio_sum
         end
         (loss_f, loss_g)
     end
@@ -32,9 +34,9 @@ function Neural.update!(opt, m::GRAMNet, x_data; isclip_ratio=false, monitor_sqd
 
     info = (mmd=mmd, pearson_divergence=pearson_divergence, loss_f=loss_f, loss_g=loss_g)
     if !isclip_ratio
-        info = (info..., raito_mean=raito_mean)
+        info = (info..., ratio_sum=ratio_sum)
     end
-    if monitor_sqd
+    if ismonitor_sqd
         sqd = mean((estimate_ratio(flatten(x_gen), flatten(x_data), m.σs) - ratio).^2)
         info = (info..., squared_distance=sqd)
     end

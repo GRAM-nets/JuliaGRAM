@@ -7,6 +7,13 @@ using MLToolkit.Datasets: flatten
 using MLToolkit.Neural: Neural, Trainable
 using Flux: @functor, Optimise
 
+# Hack to fix saving and loading issues for batch norm
+Flux.trainable(bn::BatchNorm) = (bn.β, bn.γ, bn.μ, bn.σ²)
+
+# Hack to only train weight for conv layers
+Flux.trainable(c::Conv) = (c.weight,)
+Flux.trainable(ct::ConvTranspose) = (ct.weight,)
+
 ### Neural sampler
 
 using Distributions: Distributions

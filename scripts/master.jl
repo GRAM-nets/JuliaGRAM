@@ -55,10 +55,21 @@ if args.exp == 3    # Figure 8; 1 run
     )
 end
 
+if args.exp == 4
+    general_args = Dict(
+        :notes        => "CIFAR10",
+        :dataset      => "cifar10",
+        :model        => "gramnet",
+        :n_epochs     => 100,
+        :Dz           => [150, 200],
+        :Df           => [200, 250],
+        :nowandb      => args.nowandb,
+        :isclip_ratio => false,
+    )
+end
+
 dicts = dict_list(general_args)
 paths = tmpsave(dicts)
 Threads.@threads for (p, d) in collect(zip(paths, dicts))
-    withenv("CUDA_VISIBLE_DEVICES" => (Threads.threadid() % args.n_gpus)) do
-        run(`julia $(scriptsdir("gram.jl")) $p`)
-    end
+    run(`julia $(scriptsdir("gram.jl")) $p $(Threads.threadid() % args.n_gpus)`)
 end

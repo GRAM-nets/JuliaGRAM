@@ -131,20 +131,20 @@ end # if
 if dataset == "cifar10"
     args = (args..., 
         base    = "uniform",
-        Dz      = 150,
+        Dz      = 100,
         Dhs_g   = "conv",
         act     = :(x -> leakyrelu(x, 2f-1)),
-        actlast = "identity",
+        actlast = "sigmoid",
         isnorm  = true,
         opt     = "adam",
         beta1   = 5f-1,
     )
     if model == "gramnet"
         args = (args...,
-            lr    = 2f-4,
-            sigma = "1,2,4,8,16",
+            lr    = 1f-4,
+            sigma = "1,10,100,1000",
             Dhs_f = "conv",
-            Df    = 150,
+            Df    = 200,
         )
     end
     if model == "mmdgan"

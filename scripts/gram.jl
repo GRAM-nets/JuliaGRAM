@@ -4,11 +4,16 @@ using MLToolkit.Scripting
 
 ###
 
-if length(ARGS) == 1
-    argdict_master = load(projectdir("_research", "tmp", first(ARGS)))
+if length(ARGS) == 1 || length(ARGS) == 2
+    argdict_master = load(projectdir("_research", "tmp", ARGS[1]))
+    if length(ARGS) == 2
+        gpu_id = parse(Int, ARGS[2])
+        using Flux.CuArrays: device!
+        device!(gpu_id)
+    end
 else
     argdict_master = Dict(
-        :dataset => "mnist",
+        :dataset => "cifar10",
         :model   => "gramnet",
     )
 end
@@ -17,19 +22,21 @@ end
 @assert :model in keys(argdict_master)
 
 args_ignored = (
-    n_epochs    = 35,
+    n_epochs    = 300,
     evalevery   = 100,
     is_continue = false,
     nowandb     = false,
+    wandb_name  = "$(projectname())-private",   # change this to your W&B project
     notes       = "",
     nosave      = true,
+    modelpath   = "",   # change this to load from specific path
 )
 
 args = (args_ignored...,
     seed        = 1,
     dataset     = argdict_master[:dataset],
     model       = argdict_master[:model],
-    batch_size  = 200,
+    batch_size  = 100,
 )
 
 @assert args.dataset in ["gaussian", "2dring", "3dring", "mnist", "cifar10"]
@@ -40,7 +47,7 @@ include(scriptsdir("predefined_args.jl"))
 args = concat_predefined_args(args)
 
 # Add keyword arguments
-kwargs = args.model == "gramnet" ? (isclip_ratio=true,) : NamedTuple()
+kwargs = args.model == "gramnet" ? (isclip_ratio=false, lambda=1f0, ismonitor_sqd=false) : NamedTuple()
 length(kwargs) > 0 && (args = union(args, kwargs))
 
 # Overwrite arguments from master
@@ -63,7 +70,7 @@ function get_dataset(name; kwargs...)
             args = (args..., Float32(pi / 3), 1f-1, n_mixtures, distance, var)
         end
     end
-    if name == "mnist"
+    if name in ["mnist", "cifar10"]
         kwargs = (kwargs..., is_flatten=true, alpha=0f0, is_link=false)
     end
     return Dataset(name, args...; kwargs...)
@@ -81,8 +88,6 @@ if args.dataset == "cifar10"
     To reproduce the results from our paper,
     please use the TensorFlow implementation, 
     which is available at https://github.com/GRAM-nets/GRAMFlow."
-    Flux.trainable(c::Conv) = (c.weight,)
-    Flux.trainable(ct::ConvTranspose) = (ct.weight,)
 end
 
 include(scriptsdir("model_by_args.jl"))
@@ -99,7 +104,7 @@ end
 if args.nowandb
     logger = NullLogger()
 else
-    logger = WBLogger(; project=projectname(), notes=args.notes)
+    logger = WBLogger(; project=args.wandb_name, notes=args.notes)
     config!(logger, args; ignores=keys(args_ignored))
 end
 
@@ -117,7 +122,7 @@ cbeval = get_cbeval(model, dataset)
 
 modeldir = datadir("results", args.dataset, savename(args; ignores=[keys(args_ignored)..., :dataset]))
 
-args.is_continue && loadparams!(model, joinpath(modeldir, "model.bson"))
+args.is_continue && loadparams!(model, args.modelpath == "" ? joinpath(modeldir, "model.bson") : args.modelpath)
 
 with(logger) do
     train!(

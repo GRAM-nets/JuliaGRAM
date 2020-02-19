@@ -2,7 +2,7 @@ using Flux, MLToolkit.Neural, MLToolkit.DistributionsX, Parameters
 
 parse_csv(T, l) = tuple(map(x -> parse(T, x), split(l, ","))...)
 parse_act(op::String) = eval(Symbol(op))
-parse_act(op) = op
+parse_act(op::Expr) = eval(op)
 
 function WHC(D)
     (D == (28, 28, 1) || D == 28 * 28 * 1) && return (28, 28, 1)
