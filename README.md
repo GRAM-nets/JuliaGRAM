@@ -16,13 +16,12 @@ a Julia interface for [Weights & Biases](https://www.wandb.ai/).
 3. Start a Julia REPL by entering `julia` in your terminal.
     - Press `]` button to enter the package manager.
     - Install [DrWatson](https://github.com/JuliaDynamics/DrWatson.jl) and [PyCall](https://github.com/JuliaPy/PyCall.jl) by `add DrWatson PyCall`.
-        - Input `using PyCall`.
+        - Input `using PyCall` to start install Python depedencies.
         - Input `PyCall.Conda.add("matplotlib")` to install matplotlib.
         - Input `PyCall.Conda.add("tikzplotlib")` to install tikzplotlib.
-        - Input `PyCall.Conda.add("wandb")` to install wandb (optional).
+        - Input `PyCall.Conda.add("wandb")` to install wandb.
     - Activate the project environment by `activate $GRAM_DIR`.
     - Install all dependencies by `instantiate`.
-    - Press `delete` or `backspace` to exit the package manager.
     - Exit the REPL.
 4. Do `julia $GRAM_DIR/scripts/master.jl --exp 1`
     - This will produce Figure 1 (and Figure 6 & 9 in the appendix).
