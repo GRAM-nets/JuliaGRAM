@@ -15,7 +15,7 @@ a Julia interface for [Weights & Biases](https://www.wandb.ai/).
 2. Download the code in a location which we will refer as `GRAM_DIR`.
 3. Start a Julia REPL by entering `julia` in your terminal.
     - Press `]` button to enter the package manager.
-    - Install [DrWatson](https://github.com/JuliaDynamics/DrWatson.jl) by `add DrWatson`.
+    - Install [DrWatson](https://github.com/JuliaDynamics/DrWatson.jl) and [PyCall](https://github.com/JuliaPy/PyCall.jl) by `add DrWatson PyCall`.
     - Activate the project environment by `activate $GRAM_DIR`.
     - Install all dependencies by `instantiate`.
     - Press `delete` or `backspace` to exit the package manager.
