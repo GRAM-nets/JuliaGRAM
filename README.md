@@ -4,13 +4,14 @@ This is the source code for the paper [Generative Ratio Matching Networks](https
 
 ## Check out the results interactively right now
 
-Our experiments are logged by [WeightsAndBiasLogger.jl](https://github.com/xukai92/WeightsAndBiasLogger.jl), 
-a Julia interface for [Weights & Biases](https://www.wandb.ai/), 
-please check them [here](https://app.wandb.ai/xukai92/gram-public).
+You can check our experiment logs at https://app.wandb.ai/xukai92/gram-public, 
+which are logged by [WeightsAndBiasLogger.jl](https://github.com/xukai92/WeightsAndBiasLogger.jl), 
+a Julia interface for [Weights & Biases](https://www.wandb.ai/).
 
 ## How to run the code?
 
 1. Install [Julia](https://julialang.org/downloads/) and make `julia` available in your executable path.
+    - This code was developed using Julia 1.3.1 and we suggest using the same version.
 2. Download the code in a location which we will refer as `GRAM_DIR`.
 3. Start a Julia REPL by entering `julia` in your terminal.
     - Press `]` button to enter the package manager.
