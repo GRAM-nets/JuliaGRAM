@@ -5,7 +5,7 @@ using MLToolkit.Scripting
 ###
 
 if length(ARGS) == 1 || length(ARGS) == 2
-    argdict_master = load(projectdir("_research", "tmp", ARGS[1]))
+    argdict_master = load(projectdir("_research", "tmp", ARGS[1]))["params"]
     if length(ARGS) == 2
         gpu_id = parse(Int, ARGS[2])
         using Flux.CuArrays: device!

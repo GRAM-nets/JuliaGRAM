@@ -1,4 +1,4 @@
-using Flux, MLToolkit.Neural, MLToolkit.DistributionsX, Parameters
+using Flux, MLToolkit.Neural, MLToolkit.DistributionsX
 
 parse_csv(T, l) = tuple(map(x -> parse(T, x), split(l, ","))...)
 parse_act(op::String) = eval(Symbol(op))
